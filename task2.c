@@ -112,7 +112,6 @@ int main()
     printPreOrder(root);
     printf("\nPostfix Expression : ");
     printPostOrder(root);
-
     printf("\n");
     return 0;
 }
