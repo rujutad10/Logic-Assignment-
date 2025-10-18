@@ -1,13 +1,8 @@
+#include "task2.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-// Tree node structure
-typedef struct TreeNode {
-    char val;  // Operator: '~', '*', '+', '>', '<' ; or variable: 'A'-'Z'
-    struct TreeNode *left;
-    struct TreeNode *right;
-} TreeNode;
 
 // Utility function to create a new tree node
 TreeNode* createNode(char val) {
