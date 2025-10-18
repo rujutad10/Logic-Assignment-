@@ -138,7 +138,7 @@ void inFixToPreFix(char *input, char *outputToChar)
 }
 
 // ---------------- Main Function ----------------
-int main()
+/*int main()
 {
     char input[max];
     char output[max];
@@ -151,4 +151,4 @@ int main()
     printf("Prefix Expression Stored: %s\n", output);
 
     return 0;
-}
+}*/
