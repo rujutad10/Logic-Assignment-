@@ -123,35 +123,5 @@ void printTruthTable(TreeNode *root) {
         printf("|   %d\n", result);
     }
 }
-// main function for testing
-/*int main() {
-    /*
-       Example formula: (~(P * Q) + R)
-            +
-           / \
-          ~   R
-           \
-            *
-           / \
-          P   Q
-    */
-    /*TreeNode *P = malloc(sizeof(TreeNode)); P->val = 'P'; P->left = P->right = NULL;
-    TreeNode *Q = malloc(sizeof(TreeNode)); Q->val = 'Q'; Q->left = Q->right = NULL;
-    TreeNode *R = malloc(sizeof(TreeNode)); R->val = 'R'; R->left = R->right = NULL;
 
-    TreeNode *andNode = malloc(sizeof(TreeNode)); andNode->val = '*';
-    andNode->left = P; andNode->right = Q;
-
-    TreeNode *notNode = malloc(sizeof(TreeNode)); notNode->val = '~';
-    notNode->left = NULL; notNode->right = andNode;
-
-    TreeNode *orNode = malloc(sizeof(TreeNode)); orNode->val = '+';
-    orNode->left = notNode; orNode->right = R;
-
-    // Print truth table for (~(P*Q)+R)
-    printTruthTable(orNode);
-
-    // free nodes (skipped here for brevity)
-    return 0;
-}*/
 
