@@ -123,6 +123,17 @@ TreeNode* distributeOr(TreeNode* root) {
 
     return root;
 }
+// Add this new function to task6.c
+TreeNode* convertToCNF(TreeNode* root) {
+    // Make a copy to avoid destroying the original tree
+    TreeNode* cnfTree = copyTree(root); 
+
+    cnfTree = eliminateImplications(cnfTree);
+    cnfTree = moveNotInwards(cnfTree);
+    cnfTree = distributeOr(cnfTree);
+
+    return cnfTree; 
+}
 
 // Utility: Print CNF (in-order traversal with parentheses)
 void printCNF(TreeNode* root) {
@@ -134,7 +145,7 @@ void printCNF(TreeNode* root) {
     if (root->val == '*' || root->val == '+') printf(")");
 }
 
-int main() {
+/*int main() {
     // Example: ~(A -> B) * C
     TreeNode* root = createNode('*');
     TreeNode* left = createNode('~');
@@ -154,4 +165,4 @@ int main() {
     printf("\n");
 
     return 0;
-}
+}*/
