@@ -64,18 +64,6 @@ char *convertPreOrderToTree(TreeNode **root, char *start)
 // ---------------------------------------------
 // Tree Traversal Functions
 // ---------------------------------------------
-void printInOrder(TreeNode *root)
-{
-    if (root == NULL)
-        return;
-    if (root->left != NULL)
-        printf("(");
-    printInOrder(root->left);
-    printf("%c", root->val);
-    printInOrder(root->right);
-    if (root->right != NULL)
-        printf(")");
-}
 
 void printPreOrder(TreeNode *root)
 {
