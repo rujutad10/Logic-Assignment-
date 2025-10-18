@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "task2.h"
+#include "task2.h"
 
-// ---------------------------------------------
+/*// ---------------------------------------------
 // Tree Node Structure
 // ---------------------------------------------
 typedef struct TreeNode
@@ -11,7 +13,7 @@ typedef struct TreeNode
     char val;
     struct TreeNode *left;
     struct TreeNode *right;
-} TreeNode;
+} TreeNode;*/
 
 // ---------------------------------------------
 // Function Declaration
