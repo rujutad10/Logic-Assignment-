@@ -70,6 +70,8 @@ int truthEvaluator(char operation, TreeNode *left, TreeNode *right)
     case '>':
         return ((!(leftVal)) | (rightVal));
     }
+
+    return 0;
 }
 
 // Helper to collect all distinct atoms (A–Z) from tree
