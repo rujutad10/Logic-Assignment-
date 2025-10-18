@@ -120,7 +120,7 @@ int main()
 
     // --- Task 4: Compute Tree Height ---
     printf("\n[Task 4] Calculating Height of Parse Tree...\n");
-    printf("The Height of the Parse Tree is: %d\n", maxheightOfParseTree(Root));
+    printf("The Height of the Parse Tree is: %d\n", maxHeightOfParseTree(Root));
 
     // --- Task 5: Truth Table & Evaluation ---
     printf("\n[Task 5] Generating Truth Table...\n");
