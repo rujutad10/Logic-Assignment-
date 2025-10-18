@@ -98,7 +98,7 @@ void printPostOrder(TreeNode *root)
 // ---------------------------------------------
 // Main Function for Testing
 // ---------------------------------------------
-int main()
+/*int main()
 {
     char prefixExpr[100];
 
@@ -116,4 +116,4 @@ int main()
     printPostOrder(root);
     printf("\n");
     return 0;
-}
+}*/
