@@ -14,17 +14,16 @@
  * 7. CNF Validity Check (for all formulas).
  */
 
+#include "task1.h"     // For inFixToPreFix
+#include "task2.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
+#include "cnfReader.h" // For cnfToInfix
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <time.h> // For timing
 #include <math.h>   // For pow() in task 5
-
-// all headers
-#include "task1.h"     // For inFixToPreFix
-#include "task2.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
-#include "cnfReader.h" // For cnfToInfix
 
 // Define max string size
 #define max 2048 // Increased size for safety with file inputs
