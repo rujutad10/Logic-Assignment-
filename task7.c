@@ -3,19 +3,18 @@
 #include <ctype.h>
 #include <string.h>
 
-typedef struct TreeNode {
+/*typedef struct TreeNode {
     char val;
     struct TreeNode *left;
     struct TreeNode *right;
-} TreeNode;
+} TreeNode;*/
 
-//Utility Functions
-TreeNode* createNode(char val) {
+/*TreeNode* createNode(char val) {
     TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
     node->val = val;
     node->left = node->right = NULL;
     return node;
-}
+}*/
 
 // Check if a clause is valid (contains a literal and its negation)
 int isClauseValid(TreeNode* clause) {
@@ -64,14 +63,14 @@ void checkCNFValidity(TreeNode* root, int *validCount, int *invalidCount) {
 }
 
 // Print CNF tree (for testing)
-void printCNF(TreeNode* root) {
+/*void printCNF(TreeNode* root) {
     if (!root) return;
     if (root->val == '*' || root->val == '+') printf("(");
     printCNF(root->left);
     printf("%c", root->val);
     printCNF(root->right);
     if (root->val == '*' || root->val == '+') printf(")");
-}
+}*/
 
 // ----------------- Main -----------------
 /*int main() {
