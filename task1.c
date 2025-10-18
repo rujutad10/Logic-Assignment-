@@ -1,128 +1,154 @@
-#include "task1.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <ctype.h> // for isalpha()
 
-// Tokenize infix into array of tokens: "(", ")", "+", "*", ">", "~", "x12"
-static char **tokenize(const char *s, int *n) {
-    char *copy = strdup(s);
-    int cap = 256;
-    char **arr = malloc(sizeof(char*) * cap);
-    int cnt = 0;
-    int i = 0;
-    int L = strlen(copy);
-    while (i < L) {
-        if (copy[i] == ' ' || copy[i] == '\t' || copy[i] == '\r' || copy[i] == '\n') { i++; continue; }
-        if (copy[i] == '(' || copy[i] == ')' || copy[i] == '+' || copy[i] == '*' || copy[i] == '>' ) {
-            char tmp[2] = { copy[i], 0 };
-            arr[cnt++] = strdup(tmp);
-            i++; continue;
-        }
-        if (copy[i] == '~') {
-            arr[cnt++] = strdup("~");
-            i++; continue;
-        }
-        if (isalnum(copy[i]) || copy[i]=='x') {
-            int j = i;
-            while (j < L && (isalnum(copy[j]) || copy[j]=='_' || copy[j]=='x')) j++;
-            int len = j - i;
-            char *tok = malloc(len + 1);
-            strncpy(tok, copy + i, len);
-            tok[len] = '\0';
-            arr[cnt++] = tok;
-            i = j;
-            continue;
-        }
-        // unknown char skip
-        i++;
-        if (cnt >= cap - 10) { cap *= 2; arr = realloc(arr, sizeof(char*) * cap); }
-    }
-    free(copy);
-    *n = cnt;
-    return arr;
+#define max 100
+
+// ---------------- Stack Implementation ----------------
+char stack[max];
+int top = -1;
+
+// Function to push onto stack
+void stackPush(char i)
+{
+    stack[++top] = i;
 }
 
-// recursive parse for fully parenthesized infix; returns prefix as string in static buffer
-// uses tokens array and index pointer
-static char *build_prefix(char **tokens, int *idx, int n) {
-    // if token is "(" => expression of form ( A op B ) or ( ~ A )
-    if (*idx >= n) return strdup("");
-    char *tk = tokens[*idx];
-    if (strcmp(tk, "(") == 0) {
-        (*idx)++; // skip '('
-        // check next token
-        // parse left or unary
-        char *next = tokens[*idx];
-        // If next is "~" or "(" or atom, parse leftExpr
-        char *leftExpr = NULL;
-        if (strcmp(next, "~") == 0) {
-            // unary: consume "~"
-            (*idx)++;
-            // parse operand
-            leftExpr = build_prefix(tokens, idx, n);
-            // now expect ')'
-            if (strcmp(tokens[*idx], ")") == 0) { (*idx)++; }
-            // prefix is "~" + operand
-            char *res = malloc(strlen(leftExpr) + 3);
-            sprintf(res, "~%s", leftExpr);
-            free(leftExpr);
-            return res;
-        } else {
-            // parse left
-            leftExpr = build_prefix(tokens, idx, n);
-            // next token should be operator
-            char *op = tokens[*idx];
-            (*idx)++;
-            // parse right
-            char *rightExpr = build_prefix(tokens, idx, n);
-            // expect ')'
-            if (strcmp(tokens[*idx], ")") == 0) (*idx)++;
-            // construct prefix: op + left + right (no spaces)
-            int L = strlen(op) + strlen(leftExpr) + strlen(rightExpr) + 3;
-            char *res = malloc(L);
-            res[0] = '\0';
-            strcat(res, op);
-            strcat(res, leftExpr);
-            strcat(res, rightExpr);
-            free(leftExpr);
-            free(rightExpr);
-            return res;
-        }
-    } else {
-        // token is an atom like x1
-        (*idx)++;
-        return strdup(tk);
-    }
+// Function to pop from the stack
+char stackPop()
+{
+    if (top == -1)
+        return '\0'; // Return null character if stack empty
+    else
+        return stack[top--];
 }
 
-void infixToPrefix(const char *infix, char *out) {
-    int n;
-    char **tokens = tokenize(infix, &n);
-    int idx = 0;
-    char *compact = build_prefix(tokens, &idx, n);
-    // expand compact into spaced tokens: operators are single-char tokens ~ + * >
-    char res[100000]; res[0] = '\0';
-    int L = strlen(compact);
-    for (int i=0;i<L;) {
-        if (compact[i]=='~' || compact[i]=='+' || compact[i]=='*' || compact[i]=='>') {
-            char tmp[3] = { compact[i], 0, 0 };
-            strcat(res, tmp);
-            strcat(res, " ");
-            i++;
-        } else {
-            // read atom
-            int j = i;
-            while (j < L && compact[j] != '~' && compact[j] != '+' && compact[j] != '*' && compact[j] != '>') j++;
-            strncat(res, compact + i, j - i);
-            strcat(res, " ");
-            i = j;
+// Check if stack is empty
+int stackIsEmpty()
+{
+    return top == -1;
+}
+
+// ---------------- Precedence Function ----------------
+int priority(char operation)
+{
+    if (operation == '(')
+        return 1;
+    if (operation == '~')
+        return 2;
+    if (operation == '*')
+        return 3;
+    if (operation == '+')
+        return 4;
+    if (operation == '>')
+        return 5;
+    return 0;
+}
+
+// ---------------- Infix to Prefix Conversion ----------------
+/**
+ * @brief Key Rule: 
+ * We cannot have a lower precedence operator on top of a higher precedence operator.
+ * Also, we cannot have 2 same precedence operators together.
+ * So we keep popping until it’s valid to push.
+ * If we have a closing bracket, we pop until an opening bracket is found.
+ * 
+ * Steps:
+ *  1. Swap '(' with ')' and vice versa.
+ *  2. Reverse the input.
+ *  3. Convert using infix→postfix logic.
+ *  4. Reverse the output to get prefix.
+ */
+void inFixToPreFix(char *input, char *outputToChar)
+{
+    char output[max];
+    int outputCounter = 0;
+
+    // Step 1: Swap brackets
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (input[i] == '(')
+            input[i] = ')';
+        else if (input[i] == ')')
+            input[i] = '(';
+    }
+
+    // Step 2: Reverse the string
+    int len = strlen(input);
+    for (int i = 0; i < len / 2; i++)
+    {
+        char tempChar = input[i];
+        input[i] = input[len - i - 1];
+        input[len - i - 1] = tempChar;
+    }
+
+    // Step 3: Process the reversed infix
+    char temp;
+    int t = 0;
+    while ((temp = input[t++]) != '\0')
+    {
+        if (isalpha(temp)) // Operand
+        {
+            output[outputCounter++] = temp;
+        }
+        else // Operator
+        {
+            if (temp == '(')
+            {
+                stackPush(temp);
+            }
+            else if (temp == ')')
+            {
+                // Pop until '('
+                while (!stackIsEmpty() && stack[top] != '(')
+                {
+                    output[outputCounter++] = stackPop();
+                }
+                stackPop(); // Pop '('
+            }
+            else
+            {
+                while (!stackIsEmpty() && priority(stack[top]) <= priority(temp))
+                {
+                    output[outputCounter++] = stackPop();
+                }
+                stackPush(temp);
+            }
         }
     }
-    // copy to out
-    strcpy(out, res);
-    // cleanup tokens
-    for (int i=0;i<n;i++) free(tokens[i]);
-    free(tokens);
-    free(compact);
+
+    // Pop remaining operators
+    while (!stackIsEmpty())
+    {
+        output[outputCounter++] = stackPop();
+    }
+
+    output[outputCounter] = '\0';
+
+    // Step 4: Reverse output to get prefix
+    int k = 0;
+    printf("Output in PreOrder (Prefix) Notation: ");
+    for (int i = outputCounter - 1; i >= 0; i--)
+    {
+        printf("%c", output[i]);
+        outputToChar[k++] = output[i];
+    }
+    outputToChar[k] = '\0';
+    printf("\n");
+}
+
+// ---------------- Main Function ----------------
+int main()
+{
+    char input[max];
+    char output[max];
+
+    printf("Enter Infix Expression: ");
+    scanf("%s", input);
+
+    inFixToPreFix(input, output);
+
+    printf("Prefix Expression Stored: %s\n", output);
+
+    return 0;
 }
