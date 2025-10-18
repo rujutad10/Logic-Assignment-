@@ -1,20 +1,9 @@
+#include "task2.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
-/*typedef struct TreeNode {
-    char val;
-    struct TreeNode *left;
-    struct TreeNode *right;
-} TreeNode;*/
-
-/*TreeNode* createNode(char val) {
-    TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
-    node->val = val;
-    node->left = node->right = NULL;
-    return node;
-}*/
 
 // Check if a clause is valid (contains a literal and its negation)
 int isClauseValid(TreeNode* clause) {
