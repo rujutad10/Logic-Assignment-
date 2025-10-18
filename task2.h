@@ -25,5 +25,29 @@ void printInOrder(TreeNode *root);
 void printPreOrder(TreeNode *root);
 void printPostOrder(TreeNode *root);
 
+// From task3.c
+void printInOrder(TreeNode *root); 
+
+// From task4.c
+int maxheightOfParseTree(TreeNode *root);
+int calcMax(int a, int b); 
+
+// From task5.c
+void printTruthTable(TreeNode *root);
+int truthEvaluator(char operation, TreeNode *left, TreeNode *right);
+int returnValueForLetter(char c); // Needed by main.c
+
+// From task6.c
+TreeNode* createNode(char val); // Helper
+TreeNode* copyTree(TreeNode* root); // Helper
+TreeNode* eliminateImplications(TreeNode* root);
+TreeNode* moveNotInwards(TreeNode* root);
+TreeNode* distributeOr(TreeNode* root);
+void printCNF(TreeNode* root);
+TreeNode* convertToCNF(TreeNode* root); 
+
+// From task7.c
+void checkCNFValidity(TreeNode* root, int *validCount, int *InvalidCount);
+int isClauseValid(TreeNode* clause);
 
 #endif
