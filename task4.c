@@ -11,6 +11,8 @@
  * @return int The total height of the tree.
  */
 #include "common.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int calcMax(int a, int b) {
     return (a > b) ? a : b;
