@@ -1,18 +1,20 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "common.h" 
-#include <stdlib.h>
+#include "common.h" // Use the common header for Node and strdup_s
 
-#define MAX_TOKENS 1024
+#define MAX_TOKENS 8192
 #define MAX_TOKEN_LEN 64
 
-// --- New Stack for Strings (char*) ---
+// --- Stack for storing string tokens (char*) ---
 char* stack[MAX_TOKENS];
 int top = -1;
 
 void stackPush(char* s) {
-    stack[++top] = s;
+    if (top < MAX_TOKENS - 1) {
+        stack[++top] = s;
+    }
 }
 
 char* stackPop() {
@@ -24,8 +26,8 @@ int stackIsEmpty() {
     return top == -1;
 }
 
-// --- Priority Function for Strings ---
-int priority(char* op) {
+// --- Priority function for operators (as strings) ---
+static int priority(const char* op) {
     if (strcmp(op, "(") == 0) return 1;
     if (strcmp(op, ">") == 0) return 2;
     if (strcmp(op, "+") == 0) return 3;
@@ -34,57 +36,62 @@ int priority(char* op) {
     return 0; // Atom
 }
 
-// --- Helper to Check for Atoms ---
-// An atom is anything that isn't an operator or parenthesis
-static int isAtom(char* tok) {
-    if (priority(tok) == 0 && strcmp(tok, ")") != 0) {
-        return 1;
-    }
-    return 0;
+// --- Helper to check if a token is an atom ---
+static int isAtom(const char* tok) {
+    // An atom is any token that is not a known operator or a parenthesis.
+    return (priority(tok) == 0 && strcmp(tok, ")") != 0 && strcmp(tok, "(") != 0);
 }
 
-// --- Tokenizer Function ---
-// This function splits "(x1+~x2)" into tokens: "(", "x1", "+", "~", "x2", ")"
-int tokenize(char* input, char* tokens[]) {
+/**
+ * @brief Tokenizes an infix string into an array of string tokens.
+ * This is the first step of the conversion.
+ * @param input The raw infix formula string.
+ * @param tokens An array of char* to be filled with tokens.
+ * @return The number of tokens found.
+ */
+static int tokenize(const char* input, char* tokens[]) {
     int count = 0;
-    char* p = input;
+    const char* p = input;
     char buffer[MAX_TOKEN_LEN];
-    int i = 0;
 
-    while (*p != '\0') {
-        if (isspace(*p)) {
-            p++; // Skip whitespace
-            continue;
+    while (*p != '\0' && count < MAX_TOKENS) {
+        // Skip whitespace
+        while (isspace((unsigned char)*p)) {
+            p++;
         }
+        if (*p == '\0') break;
 
-        // Operators are single chars
-        if (*p == '(' || *p == ')' || *p == '+' || *p == '*' || *p == '~' || *p == '>') {
+        // Operators and parentheses are single-character tokens
+        if (strchr("()~*+>", *p)) {
             buffer[0] = *p;
             buffer[1] = '\0';
             tokens[count++] = strdup_s(buffer);
             p++;
         }
-        // Atoms (operands) start with 'x' (or a letter) and are followed by digits
-        else if (isalpha(*p)) {
-            i = 0;
-            buffer[i++] = *p;
-            p++;
-            while (isdigit(*p)) {
-                buffer[i++] = *p;
-                p++;
+        // Atoms (variables) start with a letter, followed by letters or digits
+        else if (isalpha((unsigned char)*p)) {
+            int i = 0;
+            while (isalnum((unsigned char)*p) && i < MAX_TOKEN_LEN - 1) {
+                buffer[i++] = *p++;
             }
             buffer[i] = '\0';
             tokens[count++] = strdup_s(buffer);
         }
         else {
-            // Unknown character
+            // Handle unknown characters by skipping them
             p++;
         }
     }
     return count;
 }
 
-// --- inFixToPreFix Function ---
+
+/**
+ * @brief Converts a fully-parenthesized infix formula to prefix notation.
+ * This version is memory-safe and handles string tokens.
+ * @param input The infix formula string.
+ * @param outputToChar A large buffer to store the final, space-separated prefix string.
+ */
 void inFixToPreFix(char *input, char *outputToChar) {
     char* tokens[MAX_TOKENS];
     char* output[MAX_TOKENS];
@@ -101,16 +108,18 @@ void inFixToPreFix(char *input, char *outputToChar) {
         tokens[n - 1 - i] = temp;
     }
 
-    // 3. Swap parentheses in the token array
+    // 3. Swap parentheses (MEMORY-SAFE VERSION)
     for (int i = 0; i < n; i++) {
         if (strcmp(tokens[i], "(") == 0) {
-            tokens[i] = ")";
+            free(tokens[i]); // Free the old token "("
+            tokens[i] = strdup_s(")"); // Allocate memory for the new token ")"
         } else if (strcmp(tokens[i], ")") == 0) {
-            tokens[i] = "(";
+            free(tokens[i]); // Free the old token ")"
+            tokens[i] = strdup_s("("); // Allocate memory for the new token "("
         }
     }
 
-    // 4. Infix-to-Postfix algorithm on the reversed tokens
+    // 4. Standard Infix-to-Postfix algorithm on the reversed tokens
     for (int i = 0; i < n; i++) {
         char* tok = tokens[i];
 
@@ -122,7 +131,9 @@ void inFixToPreFix(char *input, char *outputToChar) {
             while (!stackIsEmpty() && strcmp(stack[top], "(") != 0) {
                 output[outputCounter++] = stackPop();
             }
-            stackPop(); // Pop '('
+            if (!stackIsEmpty()) {
+                stackPop(); // Pop and discard the '('
+            }
         } else { // It's an operator
             while (!stackIsEmpty() && strcmp(stack[top], "(") != 0 && priority(stack[top]) >= priority(tok)) {
                 output[outputCounter++] = stackPop();
@@ -131,23 +142,19 @@ void inFixToPreFix(char *input, char *outputToChar) {
         }
     }
 
-    // Pop remaining operators
+    // Pop remaining operators from the stack
     while (!stackIsEmpty()) {
         output[outputCounter++] = stackPop();
     }
 
-    // 5. Reverse output tokens and build final prefix string
+    // 5. Reverse the output tokens and build the final prefix string
     outputToChar[0] = '\0'; // Start with an empty string
-    printf("Output in PreOrder (Prefix) Notation: ");
     for (int i = outputCounter - 1; i >= 0; i--) {
-        printf("%s ", output[i]);
-        // Concatenate into the final output string with spaces
         strcat(outputToChar, output[i]);
-        strcat(outputToChar, " ");
+        strcat(outputToChar, " "); // Add space between tokens
     }
-    printf("\n");
 
-    // Free allocated tokens (important!)
+    // 6. Final, CRITICAL cleanup: free all allocated tokens
     for (int i = 0; i < n; i++) {
         free(tokens[i]);
     }
