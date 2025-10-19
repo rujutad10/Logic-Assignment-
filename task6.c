@@ -5,17 +5,14 @@
 
 
 // Utility function to create a new tree node
-Node* createNode(char val) {
-    Node* node = (Node*)malloc(sizeof(Node));
-    node->val = val;
-    node->left = node->right = NULL;
-    return node;
+Node* createNode(const char* tok) {
+    return newNode(tok); // Use the function from common.c
 }
 
 // Function to copy a tree
 Node* copyTree(Node* root) {
     if (!root) return NULL;
-    Node* newNode = createNode(root->val);
+    Node* newNode = createNode(root->tok); // Pass string
     newNode->left = copyTree(root->left);
     newNode->right = copyTree(root->right);
     return newNode;
@@ -27,12 +24,14 @@ Node* eliminateImplications(Node* root) {
     root->left = eliminateImplications(root->left);
     root->right = eliminateImplications(root->right);
 
-    if (root->val == '>') { // A -> B = ~A + B
-        root->val = '+';
-        Node* notLeft = createNode('~');
-        notLeft->left = root->left;
-        root->left = notLeft;
-    }
+    if (strcmp(root->tok, ">") == 0) { // A > B = ~A + B
+    free(root->tok);
+    root->tok = strdup_s("+");
+    Node* notLeft = createNode("~");
+    notLeft->right = root->left; // ~ takes one child
+    notLeft->left = NULL;
+    root->left = notLeft;
+}
 
     return root;
 }
@@ -64,13 +63,14 @@ Node* moveNotInwards(Node* root) {
             
             free(child); // Free the original '*' node
         }
-        else if (child->val == '+') { // ~(A+B) = ~A * ~B
-            root->val = '*';
-            Node* leftNot = createNode('~'); leftNot->left = child->left;
-            Node* rightNot = createNode('~'); rightNot->left = child->right;
-            root->left = moveNotInwards(leftNot);
-            root->right = moveNotInwards(rightNot);
-        }
+        // ~(A*B) = ~A + ~B
+    else if (strcmp(child->tok, "*") == 0) {
+    free(root->tok); // free "~"
+    root->tok = strdup_s("+");
+    Node* leftNot = createNode("~"); leftNot->right = child->left;
+    Node* rightNot = createNode("~"); rightNot->right = child->right;
+
+        
         else {
             root->left = moveNotInwards(root->left);
         }
@@ -144,7 +144,7 @@ void printCNF(Node* root) {
     if (!root) return;
     if (root->val == '*' || root->val == '+') printf("(");
     printCNF(root->left);
-    printf("%c", root->val);
+    printf("%s", root->tok);
     printCNF(root->right);
     if (root->val == '*' || root->val == '+') printf(")");
 }
