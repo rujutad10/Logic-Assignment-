@@ -10,7 +10,7 @@
  * @param root Pointer to the root of the parse tree.
  * @return int The total height of the tree.
  */
-#include "task2.h"
+#include "common.h"
 
 int calcMax(int a, int b) {
     return (a > b) ? a : b;
