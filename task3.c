@@ -1,4 +1,6 @@
 #include "common.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int noOfCharacters = 0;
 
