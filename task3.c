@@ -1,4 +1,4 @@
-#include "task2.h"
+#include "common.h"
 
 int noOfCharacters = 0;
 
