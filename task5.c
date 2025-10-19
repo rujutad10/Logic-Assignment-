@@ -20,7 +20,7 @@ int returnValueForLetter(char c){
 }
 
 //evaluating the logical expression recursively(bottom-up)
-int truthEvaluator(char operation, TreeNode *left, TreeNode *right)
+int truthEvaluator(char operation, Node *left, Node *right)
 {
     // initializing left sub tree and right sub tree to 99
     int leftVal = 99, rightVal = 99;
@@ -76,7 +76,7 @@ int truthEvaluator(char operation, TreeNode *left, TreeNode *right)
 }
 
 // Helper to collect all distinct atoms (A–Z) from tree
-void collectAtoms(TreeNode *root, int seen[26]) {
+void collectAtoms(Node *root, int seen[26]) {
     if (!root) return;
     if (isalpha(root->val)) {
         seen[toupper(root->val) - 'A'] = 1;
@@ -86,7 +86,7 @@ void collectAtoms(TreeNode *root, int seen[26]) {
 }
 
 // Function to print the complete truth table
-void printTruthTable(TreeNode *root) {
+void printTruthTable(Node *root) {
     int seen[26] = {0};
     collectAtoms(root, seen);
 
