@@ -17,6 +17,7 @@
 #include "task1.h"     // For inFixToPreFix
 #include "common.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
 #include "cnfReader.h" // For cnfToInfix
+#inlcude "task2.h"
 
 #include <stdio.h>
 #include <stdlib.h>
