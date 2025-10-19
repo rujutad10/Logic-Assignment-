@@ -6,7 +6,7 @@
 
 
 // Check if a clause is valid (contains a literal and its negation)
-int isClauseValid(TreeNode* clause) {
+/*int isClauseValid(TreeNode* clause) {
     if (!clause) return 0;
 
     int pos[26] = {0}; // positive literals A-Z
@@ -36,7 +36,7 @@ int isClauseValid(TreeNode* clause) {
     }
 
     return 0; // invalid clause
-}
+}*/
 
 // Traverse CNF tree and count valid/invalid clauses
 void checkCNFValidity(TreeNode* root, int *validCount, int *invalidCount) {
