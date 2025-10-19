@@ -1,22 +1,30 @@
 #include "common.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-int noOfCharacters = 0;
+// Helper to check if a token is an operator
+static int isOperator(const char* tok) {
+    return (strcmp(tok, "+") == 0 || strcmp(tok, "*") == 0 ||
+            strcmp(tok, ">") == 0 || strcmp(tok, "~") == 0);
+}
 
 void printInOrder(Node *root) {
     if (root == NULL) return;
 
-    // Check if it's an operator (i.e., not a leaf)
-    if (root->left != NULL || root->right != NULL) {
+    if (isOperator(root->tok)) {
         printf("(");
     }
-    
+
     printInOrder(root->left);
-    printf("%s ", root->tok); // Print the string token
+
+    // Add space only if there's a token on both sides
+    if (root->left) printf(" ");
+    printf("%s", root->tok);
+    if (root->right) printf(" ");
+
     printInOrder(root->right);
 
-    if (root->left != NULL || root->right != NULL) {
+    if (isOperator(root->tok)) {
         printf(")");
     }
 }
