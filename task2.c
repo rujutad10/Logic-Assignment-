@@ -65,15 +65,15 @@ void convertPreOrderToTree(Node **root, char *prefixString) {
     *root = buildTreeRecursive(tokens, &index);
 }
 
-void printInOrder(TreeNode *root);
-void printPreOrder(TreeNode *root);
-void printPostOrder(TreeNode *root);
+void printInOrder(Node *root);
+void printPreOrder(Node *root);
+void printPostOrder(Node *root);
 
 // ---------------------------------------------
 // Tree Traversal Functions
 // ---------------------------------------------
 
-void printPreOrder(TreeNode *root)
+void printPreOrder(Node *root)
 {
     if (root == NULL)
         return;
@@ -82,7 +82,7 @@ void printPreOrder(TreeNode *root)
     printPreOrder(root->right);
 }
 
-void printPostOrder(TreeNode *root)
+void printPostOrder(Node *root)
 {
     if (root == NULL)
         return;
@@ -101,7 +101,7 @@ void printPostOrder(TreeNode *root)
     printf("Enter Prefix Expression: ");
     scanf("%s", prefixExpr);
 
-    TreeNode *root = NULL;
+    Node *root = NULL;
     convertPreOrderToTree(&root, prefixExpr);
 
     printf("\nInfix Expression   : ");
