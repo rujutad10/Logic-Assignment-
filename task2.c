@@ -77,7 +77,7 @@ void printPreOrder(Node *root)
 {
     if (root == NULL)
         return;
-    printf("%c", root->val);
+    printf("%s", root->tok);
     printPreOrder(root->left);
     printPreOrder(root->right);
 }
@@ -88,28 +88,5 @@ void printPostOrder(Node *root)
         return;
     printPostOrder(root->left);
     printPostOrder(root->right);
-    printf("%c", root->val);
+    printf("%s", root->tok);
 }
-
-// ---------------------------------------------
-// Main Function for Testing
-// ---------------------------------------------
-/*int main()
-{
-    char prefixExpr[100];
-
-    printf("Enter Prefix Expression: ");
-    scanf("%s", prefixExpr);
-
-    Node *root = NULL;
-    convertPreOrderToTree(&root, prefixExpr);
-
-    printf("\nInfix Expression   : ");
-    printInOrder(root);
-    printf("\nPrefix Expression  : ");
-    printPreOrder(root);
-    printf("\nPostfix Expression : ");
-    printPostOrder(root);
-    printf("\n");
-    return 0;
-}*/
