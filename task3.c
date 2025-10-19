@@ -2,25 +2,19 @@
 
 int noOfCharacters = 0;
 
-void printInOrder(TreeNode *root)
-{
-    if (root == NULL)
-        return;
+void printInOrder(Node *root) {
+    if (root == NULL) return;
 
-    // If the node is an operator, print '('
-    if (!isalpha(root->val))
+    // Check if it's an operator (i.e., not a leaf)
+    if (root->left != NULL || root->right != NULL) {
         printf("(");
-
-    // Recurse left
+    }
+    
     printInOrder(root->left);
-
-    // Print current node's value
-    printf("%c", root->val);
-
-    // Recurse right
+    printf("%s ", root->tok); // Print the string token
     printInOrder(root->right);
 
-    // If the node is an operator, print ')'
-    if (!isalpha(root->val))
+    if (root->left != NULL || root->right != NULL) {
         printf(")");
+    }
 }
