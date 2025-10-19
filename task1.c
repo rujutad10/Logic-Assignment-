@@ -34,13 +34,13 @@ int priority(char operation)
 {
     if (operation == '(')
         return 1;
-    if (operation == '~')
-        return 2;
-    if (operation == '*')
-        return 3;
-    if (operation == '+')
-        return 4;
     if (operation == '>')
+        return 2;
+    if (operation == '+')
+        return 3;
+    if (operation == '*')
+        return 4;
+    if (operation == '~')
         return 5;
     return 0;
 }
@@ -106,15 +106,17 @@ void inFixToPreFix(char *input, char *outputToChar)
                 }
                 stackPop(); // Pop '('
             }
-            else
+            else // It's an operator (~, *, +, >)
             {
-                while (!stackIsEmpty() && priority(stack[top]) <= priority(temp))
+                // Pop operators from stack that have higher or equal precedence
+                // AND never pop a '('
+                while (!stackIsEmpty() && stack[top] != '(' && priority(stack[top]) >= priority(temp))
                 {
                     output[outputCounter++] = stackPop();
                 }
+                // Finally, push the new operator
                 stackPush(temp);
             }
-        }
     }
 
     // Pop remaining operators
