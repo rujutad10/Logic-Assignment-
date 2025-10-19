@@ -5,31 +5,31 @@
 
 
 // Utility function to create a new tree node
-TreeNode* createNode(char val) {
-    TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
+Node* createNode(char val) {
+    Node* node = (Node*)malloc(sizeof(Node));
     node->val = val;
     node->left = node->right = NULL;
     return node;
 }
 
 // Function to copy a tree
-TreeNode* copyTree(TreeNode* root) {
+Node* copyTree(Node* root) {
     if (!root) return NULL;
-    TreeNode* newNode = createNode(root->val);
+    Node* newNode = createNode(root->val);
     newNode->left = copyTree(root->left);
     newNode->right = copyTree(root->right);
     return newNode;
 }
 
 // Step 1: Eliminate implications(IMPL_FREE)
-TreeNode* eliminateImplications(TreeNode* root) {
+Node* eliminateImplications(Node* root) {
     if (!root) return NULL;
     root->left = eliminateImplications(root->left);
     root->right = eliminateImplications(root->right);
 
     if (root->val == '>') { // A -> B = ~A + B
         root->val = '+';
-        TreeNode* notLeft = createNode('~');
+        Node* notLeft = createNode('~');
         notLeft->left = root->left;
         root->left = notLeft;
     }
@@ -38,13 +38,13 @@ TreeNode* eliminateImplications(TreeNode* root) {
 }
 
 // Step 2: Move NOT inwards(NNF)
-TreeNode* moveNotInwards(TreeNode* root) {
+Node* moveNotInwards(Node* root) {
     if (!root) return NULL;
 
     if (root->val == '~') {
-        TreeNode* child = root->left;
+        Node* child = root->left;
         if (child->val == '~') { // ~~A = A
-            TreeNode* newRoot = moveNotInwards(child->left);
+            Node* newRoot = moveNotInwards(child->left);
             free(root);
             return newRoot;
         }
@@ -52,10 +52,10 @@ TreeNode* moveNotInwards(TreeNode* root) {
             root->val = '+'; // Change the node from ~ to +
 
             // new ~ node for the LEFT child
-            TreeNode* leftNot = createNode('~');
+            Node* leftNot = createNode('~');
             leftNot->left = child->left; 
             // new ~ node for the RIGHT child
-            TreeNode* rightNot = createNode('~');
+            Node* rightNot = createNode('~');
             rightNot->left = child->right; 
 
             // Recurse
@@ -66,8 +66,8 @@ TreeNode* moveNotInwards(TreeNode* root) {
         }
         else if (child->val == '+') { // ~(A+B) = ~A * ~B
             root->val = '*';
-            TreeNode* leftNot = createNode('~'); leftNot->left = child->left;
-            TreeNode* rightNot = createNode('~'); rightNot->left = child->right;
+            Node* leftNot = createNode('~'); leftNot->left = child->left;
+            Node* rightNot = createNode('~'); rightNot->left = child->right;
             root->left = moveNotInwards(leftNot);
             root->right = moveNotInwards(rightNot);
         }
@@ -83,7 +83,7 @@ TreeNode* moveNotInwards(TreeNode* root) {
 }
 
 // Step 3: Distribute OR over AND
-TreeNode* distributeOr(TreeNode* root) {
+Node* distributeOr(Node* root) {
     if (!root) return NULL;
     root->left = distributeOr(root->left);
     root->right = distributeOr(root->right);
@@ -91,12 +91,12 @@ TreeNode* distributeOr(TreeNode* root) {
     if (root->val == '+') {
         // A + (B * C) = (A+B)*(A+C)
         if (root->right && root->right->val == '*') {
-            TreeNode* newRoot = createNode('*');
-            TreeNode* leftOr = createNode('+');
+            Node* newRoot = createNode('*');
+            Node* leftOr = createNode('+');
             leftOr->left = copyTree(root->left);
             leftOr->right = root->right->left;
 
-            TreeNode* rightOr = createNode('+');
+            Node* rightOr = createNode('+');
             rightOr->left = copyTree(root->left);
             rightOr->right = root->right->right;
 
@@ -108,12 +108,12 @@ TreeNode* distributeOr(TreeNode* root) {
         }
         // (A*B) + C = (A+C)*(B+C)
         if (root->left && root->left->val == '*') {
-            TreeNode* newRoot = createNode('*');
-            TreeNode* leftOr = createNode('+');
+            Node* newRoot = createNode('*');
+            Node* leftOr = createNode('+');
             leftOr->left = root->left->left;
             leftOr->right = copyTree(root->right);
 
-            TreeNode* rightOr = createNode('+');
+            Node* rightOr = createNode('+');
             rightOr->left = root->left->right;
             rightOr->right = copyTree(root->right);
 
@@ -128,9 +128,9 @@ TreeNode* distributeOr(TreeNode* root) {
     return root;
 }
 // Add this new function to task6.c
-TreeNode* convertToCNF(TreeNode* root) {
+Node* convertToCNF(Node* root) {
     // Make a copy to avoid destroying the original tree
-    TreeNode* cnfTree = copyTree(root); 
+    Node* cnfTree = copyTree(root); 
 
     cnfTree = eliminateImplications(cnfTree);
     cnfTree = moveNotInwards(cnfTree);
@@ -140,7 +140,7 @@ TreeNode* convertToCNF(TreeNode* root) {
 }
 
 // Utility: Print CNF (in-order traversal with parentheses)
-void printCNF(TreeNode* root) {
+void printCNF(Node* root) {
     if (!root) return;
     if (root->val == '*' || root->val == '+') printf("(");
     printCNF(root->left);
