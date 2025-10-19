@@ -14,7 +14,7 @@ void printPostOrder(Node *root);
 void printInOrder(Node *root);
 
 // From task4.c
-int maxheightOfParseTree(Node *root);
+int maxHeightOfParseTree(Node *root);
 
 // From task5.c
 void printTruthTable(Node *root);
