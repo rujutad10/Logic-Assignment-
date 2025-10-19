@@ -15,7 +15,7 @@
  */
 
 #include "task1.h"     // For inFixToPreFix
-#include "task2.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
+#include "common.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
 #include "cnfReader.h" // For cnfToInfix
 
 #include <stdio.h>
@@ -33,8 +33,8 @@ int main()
     // --- Variable Declarations ---
     char inputInfix[max];
     char inputPrefix[max];
-    TreeNode *Root = NULL;
-    TreeNode *cnRoot = NULL; // This will hold the CNF tree
+    Node *Root = NULL;
+    Node *cnRoot = NULL; // This will hold the CNF tree
     
     int choice;
     char filename[256]; // For .cnf file path
