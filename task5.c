@@ -5,124 +5,96 @@
 #include <string.h>
 #include <math.h>
 
-/*// Tree Node Structure
-typedef struct TreeNode
-{
-    char val;
-    struct TreeNode *left;
-    struct TreeNode *right;
-} TreeNode;*/
-
-int truthValues[26];
-
-int returnValueForLetter(char c){ 
-    return truthValues[toupper(c) - 'A']; 
-}
+struct AtomValue {
+    char name[64];
+    int value;
+} truthValues[1024]; // Can hold up to 1024 unique atoms
+int globalAtomCount = 0;
 
 //evaluating the logical expression recursively(bottom-up)
-int truthEvaluator(char operation, Node *left, Node *right)
-{
-    // initializing left sub tree and right sub tree to 99
-    int leftVal = 99, rightVal = 99;
-    
-    //if there is a left subtree and this isn't a unary operator(~)
-    if (left != NULL && operation != '~')
-    {
-        // If left is not alphabet call the function recursively
-        if (!isalpha(left->val))
-        {
-            leftVal = truthEvaluator(left->val, left->left, left->right);
+// New helper to get the value for an atom
+int returnValueForAtom(char* tok) {
+    for (int i = 0; i < globalAtomCount; i++) {
+        if (strcmp(truthValues[i].name, tok) == 0) {
+            return truthValues[i].value;
         }
     }
+    return -1; // Error
+}
 
-    //same as above even for ~ as it only has right subtree
-    if (right != NULL)
-    {
-        // If right is not alphabet call the function recursively
-        if (!isalpha(right->val))
-        {
-            rightVal = truthEvaluator(right->val, right->left, right->right);
-        }
+int truthEvaluator(Node *root) {
+    // Base case: It's an atom
+    if (root->left == NULL && root->right == NULL) {
+        return returnValueForAtom(root->tok);
     }
 
-    // If Operation is ~ then there is no left root
-    if (operation != '~')
-    {
-        if (leftVal != 0 && leftVal != 1)
-        {
-            leftVal = returnValueForLetter(left->val);
-        }
+    // Recursive cases
+    if (strcmp(root->tok, "~") == 0) {
+        return !(truthEvaluator(root->right));
     }
 
-    if (rightVal != 0 && rightVal != 1)
-    {
-        rightVal = returnValueForLetter(right->val);
+    // Binary operators
+    int leftVal = truthEvaluator(root->left);
+    int rightVal = truthEvaluator(root->right);
+
+    if (strcmp(root->tok, "+") == 0) {
+        return leftVal | rightVal;
+    }
+    if (strcmp(root->tok, "*") == 0) {
+        return leftVal & rightVal;
+    }
+    if (strcmp(root->tok, ">") == 0) {
+        return (!leftVal) | rightVal;
     }
 
-    // if both are alphabets, do the operation
-    switch (operation)
-    {
-    case '~':
-        return !(rightVal);
-    case '+':
-        return ((leftVal) | (rightVal));
-    case '*':
-        return ((leftVal) & (rightVal));
-    case '>':
-        return ((!(leftVal)) | (rightVal));
+    return -1; // Error
+}
+// Helper to check if an atom is already in our list
+int isAtomInList(char* tok) {
+    for (int i = 0; i < globalAtomCount; i++) {
+        if (strcmp(truthValues[i].name, tok) == 0) return 1;
     }
-
     return 0;
 }
 
-// Helper to collect all distinct atoms (A–Z) from tree
-void collectAtoms(Node *root, int seen[26]) {
-    if (!root) return;
-    if (isalpha(root->val)) {
-        seen[toupper(root->val) - 'A'] = 1;
-    }
-    collectAtoms(root->left, seen);
-    collectAtoms(root->right, seen);
-}
+void collectAtoms(Node *root) {
+    if (root == NULL) return;
 
+    // Check if it's an atom
+    if (root->left == NULL && root->right == NULL) {
+        if (!isAtomInList(root->tok)) {
+            strcpy(truthValues[globalAtomCount].name, root->tok);
+            globalAtomCount++;
+        }
+    }
+    collectAtoms(root->left);
+    collectAtoms(root->right);
+}
 // Function to print the complete truth table
 void printTruthTable(Node *root) {
-    int seen[26] = {0};
-    collectAtoms(root, seen);
+    globalAtomCount = 0;
+    collectAtoms(root);
 
-    // prepare array of found atoms
-    char atoms[26];
-    int atomCount = 0;
-    for (int i = 0; i < 26; i++)
-        if (seen[i])
-            atoms[atomCount++] = 'A' + i;
-
-    if (atomCount == 0) {
+    if (globalAtomCount == 0) {
         printf("No propositional atoms found.\n");
         return;
     }
 
-    int rows = pow(2, atomCount);
-
-    // header
+    int rows = pow(2, globalAtomCount);
     printf("\nTruth Table:\n");
-    for (int i = 0; i < atomCount; i++) printf("%c ", atoms[i]);
+    for (int i = 0; i < globalAtomCount; i++) printf("%s ", truthValues[i].name);
     printf("| Result\n");
-    printf("-----------------------\n");
 
-    // iterate over all possible truth assignments
+    // ... (print header line) ...
+
     for (int i = 0; i < rows; i++) {
-        // assign truth values
-        for (int j = 0; j < atomCount; j++) {
-            int val = (i >> (atomCount - j - 1)) & 1;
-            truthValues[atoms[j] - 'A'] = val;
-            printf("%d ", val);
+        for (int j = 0; j < globalAtomCount; j++) {
+            int val = (i >> (globalAtomCount - j - 1)) & 1;
+            truthValues[j].value = val;
+            printf("%d  ", val);
         }
-
-        // evaluate the whole expression
-        int result = truthEvaluator(root->val, root->left, root->right);
+        int result = truthEvaluator(root); // New call
         printf("|   %d\n", result);
     }
 }
-
 
