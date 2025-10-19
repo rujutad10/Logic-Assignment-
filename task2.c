@@ -1,65 +1,73 @@
+#include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "task2.h"
-#include "task2.h"
 
-/*// ---------------------------------------------
-// Tree Node Structure
-// ---------------------------------------------
-typedef struct TreeNode
-{
-    char val;
-    struct TreeNode *left;
-    struct TreeNode *right;
-} TreeNode;*/
 
-// ---------------------------------------------
-// Function Declaration
-// ---------------------------------------------
-char *convertPreOrderToTree(TreeNode **root, char *start);
+#define MAX_TOKENS 1024
+
+// --- Helper function to check for atoms ---
+int isAtom(char* tok) {
+    if (strcmp(tok, "+") != 0 && strcmp(tok, "*") != 0 &&
+        strcmp(tok, ">") != 0 && strcmp(tok, "~") != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+// --- Recursive builder function ---
+// Takes an array of tokens and a pointer to the current index
+Node* buildTreeRecursive(char* tokens[], int* index) {
+    // Get the current token and advance the index
+    char* currentToken = tokens[(*index)++];
+    if (currentToken == NULL) {
+        return NULL;
+    }
+
+    // Create the new node using the function from common.c
+    Node* node = newNode(currentToken);
+
+    if (isAtom(currentToken)) {
+        // Atoms are leaves, no children
+        node->left = NULL;
+        node->right = NULL;
+        return node;
+    }
+
+    if (strcmp(currentToken, "~") == 0) {
+        // Negation has one child (right)
+        node->left = NULL;
+        node->right = buildTreeRecursive(tokens, index);
+        return node;
+    }
+
+    // All others are binary operators (+, *, >)
+    node->left = buildTreeRecursive(tokens, index);
+    node->right = buildTreeRecursive(tokens, index);
+    return node;
+}
+
+// --- Main convertPreOrderToTree function ---
+void convertPreOrderToTree(Node **root, char *prefixString) {
+    char* tokens[MAX_TOKENS];
+    int tokenCount = 0;
+    
+    // Tokenize the prefix string (it's space-separated)
+    char* tok = strtok(prefixString, " \t\n");
+    while (tok != NULL && tokenCount < MAX_TOKENS) {
+        tokens[tokenCount++] = tok;
+        tok = strtok(NULL, " \t\n");
+    }
+    tokens[tokenCount] = NULL; // Null-terminate the array
+
+    int index = 0;
+    *root = buildTreeRecursive(tokens, &index);
+}
+
 void printInOrder(TreeNode *root);
 void printPreOrder(TreeNode *root);
 void printPostOrder(TreeNode *root);
-
-// ---------------------------------------------
-// Recursive Function: Convert Prefix to Expression Tree
-// ---------------------------------------------
-char *convertPreOrderToTree(TreeNode **root, char *start)
-{
-    // Base condition
-    if (*start == '\0')
-        return start;
-
-    // Create new node if root is NULL
-    if (*root == NULL)
-    {
-        TreeNode *newTreeNode = (TreeNode *)malloc(sizeof(TreeNode));
-        newTreeNode->val = *start;
-        newTreeNode->left = NULL;
-        newTreeNode->right = NULL;
-        *root = newTreeNode;
-    }
-
-    // If current char is operand (A, B, C, etc.) → no children
-    if (isalpha(*start))
-    {
-        return start;
-    }
-
-    // If unary operator (~)
-    if (*start == '~')
-    {
-        char *currentLocation = convertPreOrderToTree(&(*root)->right, start + 1);
-        return currentLocation;
-    }
-
-    // Otherwise, it’s a binary operator (+, *, >, etc.)
-    char *currentLocation = convertPreOrderToTree(&(*root)->left, start + 1);
-    currentLocation = convertPreOrderToTree(&(*root)->right, currentLocation + 1);
-    return currentLocation;
-}
 
 // ---------------------------------------------
 // Tree Traversal Functions
