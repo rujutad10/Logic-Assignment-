@@ -36,7 +36,7 @@ int priority(char* op) {
 
 // --- Helper to Check for Atoms ---
 // An atom is anything that isn't an operator or parenthesis
-int isAtom(char* tok) {
+static int isAtom(char* tok) {
     if (priority(tok) == 0 && strcmp(tok, ")") != 0) {
         return 1;
     }
