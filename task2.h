@@ -21,7 +21,6 @@ typedef struct TreeNode
 // Function Declarations (from task2.c)
 // ---------------------------------------------
 char *convertPreOrderToTree(TreeNode **root, char *start);
-void printInOrder(TreeNode *root);
 void printPreOrder(TreeNode *root);
 void printPostOrder(TreeNode *root);
 
