@@ -118,7 +118,7 @@ void inFixToPreFix(char *input, char *outputToChar)
                 stackPush(temp);
             }
     }
-
+    }
     // Pop remaining operators
     while (!stackIsEmpty())
     {
