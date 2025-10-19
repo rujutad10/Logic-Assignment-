@@ -6,13 +6,21 @@ void printInOrder(TreeNode *root)
 {
     if (root == NULL)
         return;
-    // A new statement to figure out the number of characters
-    if (isalpha(root->val))
-        noOfCharacters++;
-    // Goes to the left sub tree
+
+    // If the node is an operator, print '('
+    if (!isalpha(root->val))
+        printf("(");
+
+    // Recurse left
     printInOrder(root->left);
-    // Prints current value
+
+    // Print current node's value
     printf("%c", root->val);
-    // Goes to the right sub tree
+
+    // Recurse right
     printInOrder(root->right);
+
+    // If the node is an operator, print ')'
+    if (!isalpha(root->val))
+        printf(")");
 }
