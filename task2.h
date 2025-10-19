@@ -29,7 +29,7 @@ void printPostOrder(TreeNode *root);
 void printInOrder(TreeNode *root); 
 
 // From task4.c
-int maxheightOfParseTree(TreeNode *root);
+int maxHeightOfParseTree(TreeNode *root);
 int calcMax(int a, int b); 
 
 // From task5.c
