@@ -228,16 +228,19 @@ Node* convertToCNF(Node* root) {
  */
 void printCNF(Node* root) {
     if (!root) return;
-    
-    // Add parentheses around binary operations
+
     if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) {
         printf("(");
     }
-    
+
     printCNF(root->left);
-    printf("%s ", root->tok); // Print the string token with a space
+
+    if (root->left) printf(" ");
+    printf("%s", root->tok);
+    if (root->right) printf(" ");
+
     printCNF(root->right);
-    
+
     if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) {
         printf(")");
     }
