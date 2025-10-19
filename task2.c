@@ -8,7 +8,7 @@
 #define MAX_TOKENS 1024
 
 // --- Helper function to check for atoms ---
-int isAtom(char* tok) {
+static int isAtom(char* tok) {
     if (strcmp(tok, "+") != 0 && strcmp(tok, "*") != 0 &&
         strcmp(tok, ">") != 0 && strcmp(tok, "~") != 0) {
         return 1;
