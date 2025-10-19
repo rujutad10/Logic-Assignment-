@@ -48,12 +48,21 @@ TreeNode* moveNotInwards(TreeNode* root) {
             free(root);
             return newRoot;
         }
-        else if (child->val == '*') { // ~(A*B) = ~A + ~B
-            root->val = '+';
-            TreeNode* leftNot = createNode('~'); leftNot->left = child->left;
-            TreeNode* rightNot = createNode('~'); rightNot->left = child->right;
+        else if (child->val == '*') { // De Morgan's: ~(A*B) = ~A + ~B
+            root->val = '+'; // Change the node from ~ to +
+
+            // new ~ node for the LEFT child
+            TreeNode* leftNot = createNode('~');
+            leftNot->left = child->left; 
+            // new ~ node for the RIGHT child
+            TreeNode* rightNot = createNode('~');
+            rightNot->left = child->right; 
+
+            // Recurse
             root->left = moveNotInwards(leftNot);
             root->right = moveNotInwards(rightNot);
+            
+            free(child); // Free the original '*' node
         }
         else if (child->val == '+') { // ~(A+B) = ~A * ~B
             root->val = '*';
