@@ -2,6 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "common.h" 
+#include <stdlib.h>
 
 #define MAX_TOKENS 1024
 #define MAX_TOKEN_LEN 64
