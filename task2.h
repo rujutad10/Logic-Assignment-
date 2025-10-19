@@ -2,51 +2,30 @@
 #ifndef TASK2_H
 #define TASK2_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include "common.h" 
+void inFixToPreFix(char *input, char *outputToChar);
 
-// ---------------------------------------------
-// Tree Node Structure
-// ---------------------------------------------
-typedef struct TreeNode
-{
-    char val;
-    struct TreeNode *left;
-    struct TreeNode *right;
-} TreeNode;
-
-// ---------------------------------------------
-// Function Declarations (from task2.c)
-// ---------------------------------------------
-char *convertPreOrderToTree(TreeNode **root, char *start);
-void printPreOrder(TreeNode *root);
-void printPostOrder(TreeNode *root);
+// From task2.c
+void convertPreOrderToTree(Node **root, char *start);
+void printPreOrder(Node *root);
+void printPostOrder(Node *root);
 
 // From task3.c
-void printInOrder(TreeNode *root); 
+void printInOrder(Node *root);
 
 // From task4.c
-int maxHeightOfParseTree(TreeNode *root);
-int calcMax(int a, int b); 
+int maxheightOfParseTree(Node *root);
 
 // From task5.c
-void printTruthTable(TreeNode *root);
-int truthEvaluator(char operation, TreeNode *left, TreeNode *right);
-int returnValueForLetter(char c); // Needed by main.c
+void printTruthTable(Node *root);
+int truthEvaluator(Node *root); // Simplified signature
 
 // From task6.c
-TreeNode* createNode(char val); // Helper
-TreeNode* copyTree(TreeNode* root); // Helper
-TreeNode* eliminateImplications(TreeNode* root);
-TreeNode* moveNotInwards(TreeNode* root);
-TreeNode* distributeOr(TreeNode* root);
-void printCNF(TreeNode* root);
-TreeNode* convertToCNF(TreeNode* root); 
+Node* convertToCNF(Node* root);
+void printCNF(Node* root);
 
 // From task7.c
-void checkCNFValidity(TreeNode* root, int *validCount, int *InvalidCount);
-int isClauseValid(TreeNode* clause);
+void checkCNFValidity(Node* root, int *validCount, int *InvalidCount);
+int isClauseValid(Node* clause);
 
 #endif
