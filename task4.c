@@ -18,7 +18,7 @@ int calcMax(int a, int b) {
     return (a > b) ? a : b;
 }
 
-int maxHeightOfParseTree(TreeNode *root)
+int maxHeightOfParseTree(Node *root)
 {
     if (root == NULL)
         return 0; // Base case: empty tree has height 0
