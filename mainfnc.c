@@ -1,44 +1,44 @@
 /**
- * @file main.c
+ * @file mainfhc.c
  * @brief Main driver program for the Logic in CS Assignment.
- * * This program integrates all tasks. It provides a menu to either
- * enter a propositional logic formula manually or to load one
- * from a .cnf file (as per the dataset requirement).
- * * It then executes the required tasks:
- * 1. Infix to Prefix conversion.
- * 2. Prefix to Parse Tree construction.
- * 3. In-order traversal (printing the infix formula back).
- * 4. Height calculation of the parse tree.
- * 5. Truth Table generation.
- * 6. CNF Conversion (ONLY for manually entered formulas).
- * 7. CNF Validity Check (for all formulas).
+ * This version uses dynamic memory allocation for buffers to prevent crashes
+ * with large input files.
  */
-
-#include "task1.h"     // For inFixToPreFix
-#include "common.h"     // For TreeNode, convertPreOrderToTree, and all other task prototypes
-#include "cnfReader.h" // For cnfToInfix
-#include "task2.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <time.h> // For timing
-#include <math.h>   // For pow() in task 5
+#include <time.h>
+#include <math.h>
 
-// Define max string size
-#define max 2048 // Increased size for safety with file inputs
+// Your Custom Project Headers
+#include "common.h"
+#include "cnfReader.h"
+#include "task1.h"
+#include "task2.h"
+
+// Define a large buffer size to prevent overflows with CNF files.
+// This matches the size used in cnfReader.c
+#define LARGE_BUFFER_SIZE 2000000
 
 int main()
 {
-    // --- Variable Declarations ---
-    char inputInfix[max];
-    char inputPrefix[max];
+    // --- Use malloc for large, dynamically allocated buffers ---
+    char *inputInfix = malloc(LARGE_BUFFER_SIZE);
+    char *inputPrefix = malloc(LARGE_BUFFER_SIZE);
+    
+    // Always check if malloc was successful
+    if (inputInfix == NULL || inputPrefix == NULL) {
+        printf("Fatal Error: Failed to allocate memory for buffers.\n");
+        return 1;
+    }
+
     Node *Root = NULL;
-    Node *cnRoot = NULL; // This will hold the CNF tree
+    Node *cnRoot = NULL;
     
     int choice;
-    char filename[256]; // For .cnf file path
+    char filename[256];
 
     clock_t start, end;
     double total_time_taken;
@@ -53,62 +53,62 @@ int main()
 
     if (scanf("%d", &choice) != 1) {
         printf("Invalid input.\n");
+        free(inputInfix);
+        free(inputPrefix);
         return 1;
     }
 
     // --- 2. Get the Formula ---
     if (choice == 1)
     {
-        // --- Manual Input ---
         printf("\n(Please use single uppercase letters as atoms: A, B, C...)\n");
         printf("Enter Infix Notation: ");
         scanf("%s", inputInfix);
     }
     else if (choice == 2)
     {
-        // --- File Input ---
         printf("\nEnter .cnf file path: ");
         scanf("%s", filename);
 
-        // Call your cnfReader function
         char *formulaFromFile = cnfToInfix(filename);
-
         if (formulaFromFile == NULL) {
             printf("Error: Could not read or process file '%s'.\n", filename);
-            return 1; // Exit on error
+            free(inputInfix);
+            free(inputPrefix);
+            return 1;
         }
 
-        // Copy the formula from the buffer to our input string
-        strncpy(inputInfix, formulaFromFile, max - 1);
-        inputInfix[max - 1] = '\0'; // Ensure null termination
+        // Copy the formula, ensuring we don't overflow our large buffer
+        strncpy(inputInfix, formulaFromFile, LARGE_BUFFER_SIZE - 1);
+        inputInfix[LARGE_BUFFER_SIZE - 1] = '\0';
         
-        // Free the memory allocated by cnfToInfix
-        free(formulaFromFile);
+        free(formulaFromFile); // Free the temporary buffer from cnfReader
 
         printf("\nSuccessfully loaded formula from %s\n", filename);
-        // Optional: Print the long infix string (might be very long!)
-        // printf("Formula: %s\n", inputInfix);
     }
     else
     {
         printf("Invalid choice. Exiting.\n");
+        free(inputInfix);
+        free(inputPrefix);
         return 1;
     }
 
     // --- 3. Start Processing ---
     printf("\n--- Starting All Tasks ---\n");
-    start = clock(); // Start the timer
+    start = clock();
 
     // --- Task 1: Infix to Prefix ---
     printf("\n[Task 1] Converting Infix to Prefix...\n");
     inFixToPreFix(inputInfix, inputPrefix);
-    printf("Prefix Expression: %s\n", inputPrefix);
 
     // --- Task 2: Prefix to Parse Tree ---
     printf("\n[Task 2] Building Parse Tree from Prefix...\n");
     convertPreOrderToTree(&Root, inputPrefix);
     if (Root == NULL) {
         printf("Error: Failed to build parse tree. Check your input.\n");
+        free(inputInfix);
+        free(inputPrefix);
         return 1;
     }
     printf("Parse Tree built successfully.\n");
@@ -130,27 +130,22 @@ int main()
     // --- Task 6: Convert to CNF (CONDITIONAL) ---
     if (choice == 1)
     {
-        // Only run CNF conversion for manually entered formulas
         printf("\n[Task 6] Converting to CNF (Manual Input)...\n");
-        cnRoot = convertToCNF(Root); // Call your wrapper function
+        cnRoot = convertToCNF(Root);
         printf("CNF Formula: ");
         printCNF(cnRoot);
         printf("\n");
     }
     else
     {
-        // Input from .cnf file is ALREADY in CNF.
         printf("\n[Task 6] Skipped (Input from .cnf file is already in CNF).\n");
-        // For Task 7, the CNF tree is just the original tree
         cnRoot = Root;
     }
 
     // --- Task 7: CNF Validity Check ---
     printf("\n[Task 7] Checking CNF Validity...\n");
     int valid = 0, invalid = 0;
-    
-    // Check validity on the correct tree (either converted or from file)
-    checkCNFValidity(cnRoot, &valid, &invalid); 
+    checkCNFValidity(cnRoot, &valid, &invalid);
     
     printf("Valid Clauses: %d\n", valid);
     printf("Invalid Clauses: %d\n", invalid);
@@ -161,7 +156,7 @@ int main()
     }
 
     // --- 4. Final Timing ---
-    end = clock(); // Stop the timer
+    end = clock();
     total_time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
 
     printf("\n----------------------------------------\n");
@@ -169,5 +164,16 @@ int main()
     printf("Total execution time: %f seconds\n", total_time_taken);
     printf("----------------------------------------\n");
 
+    // --- 5. Final Cleanup ---
+    printf("Freeing memory...\n");
+    freeTree(Root); // This frees the original tree
+    if (choice == 1 && cnRoot != Root) {
+         // If choice was 1, cnRoot is a *copy* and must also be freed
+         freeTree(cnRoot);
+    }
+    free(inputInfix);
+    free(inputPrefix);
+
     return 0;
 }
+
