@@ -1,16 +1,17 @@
+#include "task2.h"
 #include <stdio.h>
 #include <ctype.h>   
 #include <stdlib.h>  
 #include <string.h>
 #include <math.h>
 
-// Tree Node Structure
+/*// Tree Node Structure
 typedef struct TreeNode
 {
     char val;
     struct TreeNode *left;
     struct TreeNode *right;
-} TreeNode;
+} TreeNode;*/
 
 int truthValues[26];
 
