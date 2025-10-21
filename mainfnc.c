@@ -1,9 +1,29 @@
+
+// Define a large buffer size to prevent overflows with CNF files.
+// This matches the size used in cnfReader.c
+#define LARGE_BUFFER_SIZE 2000000
 /**
  * @file mainfhc.c
  * @brief Main driver program for the Logic in CS Assignment.
- * This version uses dynamic memory allocation for buffers to prevent crashes
- * with large input files.
+ *
+ * This program allows the user to either input a formula manually in infix notation
+ * or process a DIMACS .cnf file. It then performs several tasks:
+ *   - Task 1: Convert infix to prefix
+ *   - Task 2: Build a parse tree from the prefix
+ *   - Task 3: In-order traversal
+ *   - Task 4: Compute parse tree height
+ *   - Task 5: Generate truth table and evaluate
+ *   - Task 6: Convert to CNF (for manual input)
+ *   - Task 7: Check CNF validity
+ *
+ * Large buffers are dynamically allocated to handle large CNF files.
  */
+
+#include "task3.h"
+#include "task4.h"
+#include "task5.h"
+#include "task6.h"
+#include "task7.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,16 +32,20 @@
 #include <time.h>
 #include <math.h>
 
-// Your Custom Project Headers
 #include "common.h"
 #include "cnfReader.h"
 #include "task1.h"
 #include "task2.h"
 
-// Define a large buffer size to prevent overflows with CNF files.
-// This matches the size used in cnfReader.c
 #define LARGE_BUFFER_SIZE 2000000
 
+/**
+ * @brief Entry point for the program.
+ *
+ * Handles user input, processing tasks 1-7, timing, and cleanup.
+ *
+ * @return int 0 on successful completion, 1 on error.
+ */
 int main()
 {
     // --- Use malloc for large, dynamically allocated buffers ---
@@ -116,7 +140,7 @@ int main()
     // --- Task 3: In-order Traversal ---
     printf("\n[Task 3] Re-printing expression (In-Order Traversal)...\n");
     printf("Infix Expression: ");
-    printInOrder(Root);
+    printPreOrder(Root);
     printf("\n");
 
     // --- Task 4: Compute Tree Height ---

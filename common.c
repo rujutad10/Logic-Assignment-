@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 
+/**
+ * @copydoc strdup_s
+ */
 char *strdup_s(const char *s) {
     if (!s) return NULL;
     char *r = malloc(strlen(s) + 1);
@@ -11,6 +14,9 @@ char *strdup_s(const char *s) {
     return r;
 }
 
+/**
+ * @copydoc newNode
+ */
 Node* newNode(const char *tok) {
     Node *n = (Node*)malloc(sizeof(Node));
     if (!n) { perror("malloc"); return NULL; }
@@ -20,6 +26,9 @@ Node* newNode(const char *tok) {
     return n;
 }
 
+/**
+ * @copydoc freeTree
+ */
 void freeTree(Node *r) {
     if (!r) return;
     freeTree(r->left);

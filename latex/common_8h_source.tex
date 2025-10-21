@@ -1,0 +1,22 @@
+\doxysection{common.\+h}
+\hypertarget{common_8h_source}{}\label{common_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ common.h}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#ifndef\ COMMON\_H}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#define\ COMMON\_H}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_node}{Node}}\ \{}
+\DoxyCodeLine{00007\ \ \ \ \ \textcolor{keywordtype}{char}\ *tok;\ \textcolor{comment}{//\ This\ holds\ a\ STRING,\ not\ a\ char}}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_node}{Node}}\ *left;}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_node}{Node}}\ *right;}
+\DoxyCodeLine{00010\ \}\ \mbox{\hyperlink{struct_node}{Node}};}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{comment}{//\ Helper\ function\ prototypes}}
+\DoxyCodeLine{00013\ \mbox{\hyperlink{struct_node}{Node}}*\ newNode(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *tok);}
+\DoxyCodeLine{00014\ \textcolor{keywordtype}{void}\ freeTree(\mbox{\hyperlink{struct_node}{Node}}\ *r);}
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{char}\ *strdup\_s(\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *s);}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

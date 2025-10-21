@@ -1,220 +1,144 @@
+/**
+ * @file task6.c
+ * @brief Implements logical formula conversion to Conjunctive Normal Form (CNF).
+ *
+ * This module eliminates implications, applies De Morgan’s laws,
+ * and distributes OR over AND to obtain a valid CNF representation.
+ * @section algo Algorithm:
+ *   Step 1: Eliminate implications (A > B) → (~A + B)
+ *   Step 2: Move negations inward (De Morgan's laws)
+ *   Step 3: Distribute OR over AND (convert to CNF)
+ * 
+ * @section time Time Complexity: O(2^n) worst case
+ *   - Step 1 (Eliminate >): O(n) single pass
+ *   - Step 2 (Move ~): O(n) single pass
+ *   - Step 3 (Distribute +): O(n × k) tree expansion
+ *     k = expansion factor, can be exponential
+ *   - WORST CASE: Tree expands from O(n) to O(2^n) nodes
+ * 
+ * @section space Space Complexity: O(2^n) worst case
+ *   - Original tree copy: O(n)
+ *   - Expanded tree: O(2^n) in worst case
+ *   - Multiple intermediate trees during transformation
+ */
+
 #include "common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Forward declarations for recursive functions
+// Forward declarations
 Node* eliminateImplications(Node* root);
 Node* moveNotInwards(Node* root);
 Node* distributeOr(Node* root);
 Node* copyTree(Node* root);
 
 /**
- * @brief Utility function to create a new node.
- * This is a simple wrapper around the newNode function from common.c.
- * @param tok The string token for the node's value (e.g., "+", "~", "x12").
- * @return A pointer to the newly created Node.
- */
-Node* createNode(const char* tok) {
-    return newNode(tok);
-}
-
-/**
  * @brief Creates a deep copy of a parse tree.
- * @param root The root of the tree to copy.
- * @return A pointer to the root of the new, copied tree.
+ *
+ * @param root Root node of the original tree.
+ * @return Pointer to the new tree.
  */
 Node* copyTree(Node* root) {
     if (!root) return NULL;
-    // Create a new node with a copy of the token string
-    Node* newNode = createNode(root->tok);
-    newNode->left = copyTree(root->left);
-    newNode->right = copyTree(root->right);
-    return newNode;
+
+    Node* nodeCopy = newNode(root->tok);  // ✅ no naming conflict now
+    nodeCopy->left = copyTree(root->left);
+    nodeCopy->right = copyTree(root->right);
+
+    return nodeCopy;
 }
 
+
 /**
- * @brief Step 1: Recursively eliminates all implication operators ('>').
- * Replaces every (A > B) with (~A + B).
- * @param root The root of the tree/subtree to process.
- * @return The root of the modified tree.
+ * @brief Eliminates implication operators (A > B → (~A + B)).
+ *
+ * @param root Root node of the tree/subtree.
+ * @return Modified tree root.
  */
 Node* eliminateImplications(Node* root) {
     if (!root) return NULL;
-
-    // Recurse down to the leaves first
     root->left = eliminateImplications(root->left);
     root->right = eliminateImplications(root->right);
 
-    // If we find an implication node, transform it
     if (strcmp(root->tok, ">") == 0) {
-        // Change current node's value from ">" to "+"
         free(root->tok);
         root->tok = strdup_s("+");
-
-        // Create a new negation node '~'
-        Node* notLeft = createNode("~");
-        notLeft->right = root->left; // The operand for '~' is its right child
-        notLeft->left = NULL;
-
-        // Replace the original left child with the new negation structure
+        Node* notLeft = newNode("~");
+        notLeft->right = root->left;
         root->left = notLeft;
     }
     return root;
 }
 
 /**
- * @brief Step 2: Recursively moves all negation operators ('~') inward.
- * Applies De Morgan's laws and eliminates double negations (~~A).
- * @param root The root of the implication-free tree.
- * @return The root of the modified tree in Negation Normal Form (NNF).
+ * @brief Pushes negations inward using De Morgan’s laws.
+ *
+ * Handles double negations and distributes negations across operators.
+ *
+ * @param root Root node.
+ * @return Tree in Negation Normal Form (NNF).
  */
 Node* moveNotInwards(Node* root) {
     if (!root) return NULL;
 
-    // We only need to act if the current node is a negation
     if (strcmp(root->tok, "~") == 0) {
-        Node* child = root->right; // The operand of ~ is the right child
-
-        // Case 1: Double Negation (~~A becomes A)
-        if (strcmp(child->tok, "~") == 0) {
-            Node* grandChild = child->right;
-            free(root->tok); // Free the outer '~' token
-            free(root);      // Free the outer '~' node
-            free(child->tok); // Free the inner '~' token
-            free(child);      // Free the inner '~' node
-            // Recurse on the grandchild, as there could be more negations (e.g., ~~~~A)
-            return moveNotInwards(grandChild);
-        }
-
-        // Case 2: De Morgan's Law for AND: ~(A * B) becomes (~A + ~B)
+        Node* child = root->right;
+        if (strcmp(child->tok, "~") == 0)
+            return moveNotInwards(child->right);
         if (strcmp(child->tok, "*") == 0) {
-            // Change the root node from '~' to '+'
-            free(root->tok);
             root->tok = strdup_s("+");
-
-            // Create new negation nodes for the original children
-            Node* notLeft = createNode("~");
-            notLeft->right = child->left; // Note: child of ~ is always right
-
-            Node* notRight = createNode("~");
-            notRight->right = child->right;
-
-            // The root's new children are the recursed-upon negations
-            root->left = moveNotInwards(notLeft);
-            root->right = moveNotInwards(notRight);
-            
-            free(child->tok); // Free the '*' token
-            free(child);      // Free the '*' node
+            Node* a = newNode("~"); a->right = child->left;
+            Node* b = newNode("~"); b->right = child->right;
+            root->left = moveNotInwards(a);
+            root->right = moveNotInwards(b);
             return root;
         }
-
-        // Case 3: De Morgan's Law for OR: ~(A + B) becomes (~A * ~B)
         if (strcmp(child->tok, "+") == 0) {
-            // Change the root node from '~' to '*'
-            free(root->tok);
             root->tok = strdup_s("*");
-
-            Node* notLeft = createNode("~");
-            notLeft->right = child->left;
-            
-            Node* notRight = createNode("~");
-            notRight->right = child->right;
-
-            root->left = moveNotInwards(notLeft);
-            root->right = moveNotInwards(notRight);
-
-            free(child->tok); // Free the '+' token
-            free(child);      // Free the '+' node
+            Node* a = newNode("~"); a->right = child->left;
+            Node* b = newNode("~"); b->right = child->right;
+            root->left = moveNotInwards(a);
+            root->right = moveNotInwards(b);
             return root;
         }
     }
-
-    // If not a '~' node, just recurse on children
     root->left = moveNotInwards(root->left);
     root->right = moveNotInwards(root->right);
     return root;
 }
 
-
 /**
- * @brief Step 3: Recursively distributes OR ('+') over AND ('*').
- * Replaces A + (B * C) with (A + B) * (A + C).
- * @param root The root of the tree in NNF.
- * @return The root of the final CNF tree.
+ * @brief Distributes OR (‘+’) over AND (‘*’) recursively.
+ *
+ * @param root Root of the NNF tree.
+ * @return Tree converted into CNF.
  */
 Node* distributeOr(Node* root) {
     if (!root) return NULL;
-
-    // Recurse down to the leaves first
     root->left = distributeOr(root->left);
     root->right = distributeOr(root->right);
 
-    // Check if the current node is an OR
     if (strcmp(root->tok, "+") == 0) {
-        // Case 1: A + (B * C)
         if (root->right && strcmp(root->right->tok, "*") == 0) {
-            Node* a = root->left;
-            Node* b = root->right->left;
-            Node* c = root->right->right;
-
-            // Create the new structure: (A + B) * (A + C)
-            Node* newLeft = createNode("+");
-            newLeft->left = copyTree(a);
-            newLeft->left = distributeOr(newLeft->left);
-            newLeft->right = b;
-
-            Node* newRight = createNode("+");
-            newRight->left = a;
-            newRight->right = c;
-
-            // Change the original root node from '+' to '*'
-            free(root->tok);
+            Node* a = root->left, *b = root->right->left, *c = root->right->right;
+            Node* left = newNode("+"); left->left = copyTree(a); left->right = b;
+            Node* right = newNode("+"); right->left = a; right->right = c;
             root->tok = strdup_s("*");
-            root->left = distributeOr(newLeft);
-            root->right = distributeOr(newRight);
-
-            // Free the old '*' node that was replaced
-            free(root->right->tok);
-            free(root->right);
-        }
-        // Case 2: (A * B) + C
-        else if (root->left && strcmp(root->left->tok, "*") == 0) {
-            Node* a = root->left->left;
-            Node* b = root->left->right;
-            Node* c = root->right;
-            
-            // Create the new structure: (A + C) * (B + C)
-            Node* newLeft = createNode("+");
-            newLeft->left = a;
-            newLeft->right = copyTree(c);
-            newLeft->right = distributeOr(newLeft->right);
-
-            Node* newRight = createNode("+");
-            newRight->left = b;
-            newRight->right = c;
-            
-            // Change the original root node from '+' to '*'
-            free(root->tok);
-            root->tok = strdup_s("*");
-            root->left = distributeOr(newLeft);
-            root->right = distributeOr(newRight);
-            
-            // Free the old '*' node that was replaced
-            free(root->left->tok);
-            free(root->left);
+            root->left = distributeOr(left);
+            root->right = distributeOr(right);
         }
     }
     return root;
 }
 
 /**
- * @brief Wrapper function that performs the full conversion to CNF.
- * @param root The root of the original parse tree.
- * @return A pointer to the root of the new tree in CNF.
+ * @brief Converts a formula tree to Conjunctive Normal Form.
+ *
+ * @param root Root of the original formula tree.
+ * @return Root of the CNF tree.
  */
 Node* convertToCNF(Node* root) {
-    // We operate on a copy to preserve the original tree
     Node* cnfTree = copyTree(root);
     cnfTree = eliminateImplications(cnfTree);
     cnfTree = moveNotInwards(cnfTree);
@@ -223,26 +147,15 @@ Node* convertToCNF(Node* root) {
 }
 
 /**
- * @brief Utility function to print the CNF formula.
- * @param root The root of the CNF tree.
+ * @brief Prints the CNF formula in infix form.
+ *
+ * @param root Root node of the CNF tree.
  */
 void printCNF(Node* root) {
     if (!root) return;
-
-    if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) {
-        printf("(");
-    }
-
+    if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) printf("(");
     printCNF(root->left);
-
-    if (root->left) printf(" ");
-    printf("%s", root->tok);
-    if (root->right) printf(" ");
-
+    printf(" %s ", root->tok);
     printCNF(root->right);
-
-    if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) {
-        printf(")");
-    }
+    if (strcmp(root->tok, "*") == 0 || strcmp(root->tok, "+") == 0) printf(")");
 }
-
